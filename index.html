@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Bingo and Notepad</title>
+  <!-- Add the Icons8 favicon here -->
+  <link rel="icon" href="https://img.icons8.com/?size=100&id=66772&format=png&color=40C057" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      width: 90%;
+      max-width: 1200px;
+      height: 80vh;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .bingo-container {
+      flex: 3;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Style for the icon inside the heading */
+    .icon {
+      width: 30px;
+      height: 30px;
+    }
+
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .bingo-cell {
+      width: 100%;
+      padding: 20px;
+      text-align: center;
+      border-radius: 5px;
+      background-color: #eee;
+      transition: background-color 0.3s;
+      cursor: pointer;
+    }
+
+    .bingo-cell.checked {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    input {
+      padding: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4caf50;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .notepad-container {
+      flex: 2;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      background-color: #f7f7f7;
+      border-left: 2px solid #ddd;
+    }
+
+    .notepad-container textarea {
+      width: 100%;
+      height: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .notepad-container button {
+      margin-top: 20px;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Bingo Section -->
+    <div class="bingo-container">
+      <h1>
+        <!-- Display the icon inside the heading -->
+        <img src="https://img.icons8.com/?size=100&id=66772&format=png&color=40C057" alt="Bingo Icon" class="icon">
+        Custom Bingo Card
+      </h1>
+      <input type="text" id="bingoInput" placeholder="Enter custom item and press Enter">
+      <div class="controls">
+        <button onclick="saveBingo()">Save Bingo</button>
+        <button onclick="loadBingo()">Load Bingo</button>
+        <button onclick="clearBingo()">Clear Bingo</button>
+      </div>
+      <div class="bingo-grid" id="bingoGrid">
+        <!-- Bingo grid will be generated here -->
+      </div>
+    </div>
+
+    <!-- Notepad Section -->
+    <div class="notepad-container">
+      <h2>Notepad</h2>
+      <textarea id="notepad" placeholder="Type your notes here..."></textarea>
+      <button onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+
+  <script>
+    let bingoItems = [];
+    const bingoGrid = document.getElementById('bingoGrid');
+    const bingoInput = document.getElementById('bingoInput');
+
+    // Add item to bingo grid
+    bingoInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && bingoInput.value.trim()) {
+        const newItem = bingoInput.value.trim();
+        bingoItems.push(newItem);
+        generateBingoGrid();
+        bingoInput.value = '';
+      }
+    });
+
+    // Generate bingo grid
+    function generateBingoGrid() {
+      bingoGrid.innerHTML = '';
+      bingoItems.forEach((item, index) => {
+        const cell = document.createElement('div');
+        cell.classList.add('bingo-cell');
+        cell.textContent = item;
+
+        // Mark as checked on single click
+        cell.addEventListener('click', () => {
+          cell.classList.toggle('checked');
+        });
+
+        // Edit item on double-click
+        cell.addEventListener('dblclick', () => {
+          const newItem = prompt('Edit this item:', item);
+          if (newItem !== null && newItem.trim()) {
+            bingoItems[index] = newItem.trim();
+            generateBingoGrid();
+          }
+        });
+
+        bingoGrid.appendChild(cell);
+      });
+    }
+
+    // Save Bingo grid to localStorage
+    function saveBingo() {
+      localStorage.setItem('bingoItems', JSON.stringify(bingoItems));
+      alert('Bingo saved!');
+    }
+
+    // Load Bingo grid from localStorage
+    function loadBingo() {
+      const savedBingo = localStorage.getItem('bingoItems');
+      if (savedBingo) {
+        bingoItems = JSON.parse(savedBingo);
+        generateBingoGrid();
+      } else {
+        alert('No saved Bingo found.');
+      }
+    }
+
+    // Clear Bingo grid
+    function clearBingo() {
+      bingoItems = [];
+      generateBingoGrid();
+    }
+
+    // Notepad Save
+    function saveNote() {
+      const notepadContent = document.getElementById('notepad').value;
+      localStorage.setItem('notepadContent', notepadContent);
+      alert('Note saved!');
+    }
+
+    // Load saved notepad content on page load
+    window.onload = function () {
+      const savedNote = localStorage.getItem('notepadContent');
+      if (savedNote) {
+        document.getElementById('notepad').value = savedNote;
+      }
+
+      // Load saved Bingo on page load
+      loadBingo();
+    };
+  </script>
+
+</body>
+</html>
